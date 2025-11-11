@@ -1,63 +1,74 @@
 from abc import ABC, abstractmethod
+
 from tabulate import tabulate
-
-from parsers.classes import Parser, ParserCSVtoDict
-
 
 
 class Report(ABC):
-    """Абстрактный класс Отчета."""
-
-    def __init__(self, report_name: str):
-        self.report_name = report_name
 
     @abstractmethod
-    def create_report_data(self, parsed_data):
+    def get_report_data(self):
         pass
 
 
-class PrintableReportView:
+class ReportAverage(Report):
+
+    def __init__(self, input_data):
+        self.input_data = input_data
+
+    def get_report_data(
+        self,
+        position_value,
+        culculated_value
+    ):
+
+        report_data = {}
+
+        for row in self.input_data:
+            report_data.setdefault(
+                row[position_value], []
+            ).append(float(row[culculated_value]))
+
+        
+        report_data = [
+            [key, round(sum(values) / len(values), 2)] for key, values in report_data.items()
+        ]
+        report_data.sort(key=lambda i: i[1], reverse=True)
+        
+        return report_data
+    
+
+class ReportManager:
+
+    def __init__(self, report: Report):
+        self.report = report
+
+    def get_report(self, position_value, culculated_value):
+        return self.report.get_report_data(
+            position_value, culculated_value
+        )
+
+
+class PrintableReport:
+
+    def __init__(self, data):
+        self.data = data
 
     def print_report_table(
+        self,
         report_name: str,
-        report_data: list,
         headers: list
     ) -> None:
         """Класс консольного вывода таблицы с отчетом."""
 
         report_table = tabulate(
-            report_data,
+            self.data,
             headers=headers,
             tablefmt='psql',
-            showindex=range(1, len(report_data) + 1)
+            showindex=range(1, len(self.data) + 1)
         )
 
         print(report_name, report_table, sep='\n')
 
 
-class DictReport(Report):
 
-    def create_report_data(
-        self,
-        parsed_data,
-        position_value,
-        culculated_value
-    ):
         
-        summary_report: dict = {}
-        
-        for row in parsed_data:
-            summary_report.setdefault(
-                row[position_value], []
-            ).append(float(row[culculated_value]))
-
-
-        report_data = [
-            [key, round(sum(values) / len(values), 2)]
-            for key, values in summary_report.items()
-        ]
-        report_data.sort(key=lambda i: i[1], reverse=True)
-
-        headers = [position_value, culculated_value]
-
-        return self.report_name, report_data, headers

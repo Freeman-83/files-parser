@@ -1,33 +1,46 @@
-from parsers.classes import Parser, CommandLineParser, ParserCSVtoDict
-from reports.classes import Report, DictReport, PrintableReportView
+from parsers.classes import (
+    Parser,
+    CommandLineParser,
+    ArgParser,
+    ParserCSV,
+    ParserManager
+)
+from reports.classes import (
+    Report,
+    ReportAverage,
+    PrintableReport,
+    ReportManager
+)
 
 from consts import REPORT_CHOISES
 
 
 def main():
     # report_name = input()
-    dir_path = input()
+    dir_path = input('Укажите путь к месту расположения файлов: ')
     # parsing_files = list(map(input().split()))
 
-    command_line_parser = CommandLineParser()
-    args = command_line_parser.get_args()
+    arg_parser = ArgParser()
+    args = arg_parser.get_args()
 
     report_name = args.report
     parsing_files = args.files
+    headers = REPORT_CHOISES[report_name]
+
+
+    csv_parser = ParserCSV()
     
-    parser = ParserCSVtoDict()
-    parsed_data = parser.create_parsed_data(dir_path, parsing_files)
+    parser_manager = ParserManager(csv_parser)
+    parsed_data = parser_manager.get_parsed_data(dir_path, parsing_files)
 
-    report = DictReport(report_name)
-    report_data = report.create_report_data(
-        parsed_data,
-        report_name,
-        *REPORT_CHOISES[report_name]
-    )
 
-    printable_data = PrintableReportView()
-    printable_data.print_report_table(*printable_data)
+    report_average = ReportAverage(parsed_data)
 
+    report_manager = ReportManager(report_average)
+    report_data = report_manager.get_report(*headers)
+
+    report = PrintableReport(report_data)
+    report.print_report_table(report_name, headers)
 
 
 if __name__ == '__main__':
