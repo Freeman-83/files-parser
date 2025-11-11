@@ -6,7 +6,7 @@ from tabulate import tabulate
 class Report(ABC):
 
     @abstractmethod
-    def get_report_data(self):
+    def create_report_data(self):
         pass
 
 
@@ -15,7 +15,7 @@ class ReportAverage(Report):
     def __init__(self, input_data):
         self.input_data = input_data
 
-    def get_report_data(
+    def create_report_data(
         self,
         position_value,
         culculated_value
@@ -43,7 +43,7 @@ class ReportManager:
         self.report = report
 
     def get_report(self, position_value, culculated_value):
-        return self.report.get_report_data(
+        return self.report.create_report_data(
             position_value, culculated_value
         )
 

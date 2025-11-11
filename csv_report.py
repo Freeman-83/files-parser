@@ -1,9 +1,10 @@
 from parsers.classes import (
-    Parser,
+    FilesParser,
     CommandLineParser,
     ArgParser,
     ParserCSV,
-    ParserManager
+    FilesParserManager,
+    CommandLineParserManager
 )
 from reports.classes import (
     Report,
@@ -16,23 +17,21 @@ from consts import REPORT_CHOISES
 
 
 def main():
-    # report_name = input()
+
     dir_path = input('Укажите путь к месту расположения файлов: ')
-    # parsing_files = list(map(input().split()))
 
     arg_parser = ArgParser()
-    args = arg_parser.get_args()
+    csv_parser = ParserCSV()
 
-    report_name = args.report
-    parsing_files = args.files
+    files_parser_manager = FilesParserManager(csv_parser)
+    command_line_parser_manager = CommandLineParserManager(arg_parser)
+
+    command_line_args = command_line_parser_manager.get_command_line_args()
+    report_name = command_line_args.report
+    parsing_files = command_line_args.files
     headers = REPORT_CHOISES[report_name]
 
-
-    csv_parser = ParserCSV()
-    
-    parser_manager = ParserManager(csv_parser)
-    parsed_data = parser_manager.get_parsed_data(dir_path, parsing_files)
-
+    parsed_data = files_parser_manager.get_files_parsed_data(dir_path, parsing_files)
 
     report_average = ReportAverage(parsed_data)
 

@@ -8,7 +8,8 @@ from abc import ABC, abstractmethod
 from consts import REPORT_CHOISES
 
 
-class Parser(ABC):
+
+class FilesParser(ABC):
     """Абстрактный класс Парсера."""
 
     @abstractmethod
@@ -16,7 +17,19 @@ class Parser(ABC):
         pass
 
 
-class ParserCSV(Parser):
+class CommandLineParser(ABC):
+    """Абстрактный класс парсера коммандной строки."""
+
+    @abstractmethod
+    def get_args(self, args=None):
+        pass
+
+
+class ParserManager(ABC):
+    pass
+
+
+class ParserCSV(FilesParser):
     """Класс CSV-парсера."""
 
     def create_parsed_data(
@@ -35,12 +48,6 @@ class ParserCSV(Parser):
                     parsed_data.append(row)
 
         return parsed_data
-
-
-class CommandLineParser(ABC):
-
-    def get_args(self):
-        pass
 
 
 class ArgParser(CommandLineParser):
@@ -70,13 +77,19 @@ class ArgParser(CommandLineParser):
         return args
 
 
-class ParserManager:
+class FilesParserManager(ParserManager):
 
-    def __init__(self, parser: Parser):
-        self.parser = parser
+    def __init__(self, files_parser: FilesParser):
+        self.files_parser = files_parser
 
-    def get_parsed_data(self, dir_path, parsing_files):
-        return self.parser.create_parsed_data(dir_path, parsing_files)
+    def get_files_parsed_data(self, dir_path, parsing_files):
+        return self.files_parser.create_parsed_data(dir_path, parsing_files)
 
 
+class CommandLineParserManager(ParserManager):
 
+    def __init__(self, command_line_parser: CommandLineParser):
+        self.command_line_parser = command_line_parser
+
+    def get_command_line_args(self, args=None):
+        return self.command_line_parser.get_args(args)
